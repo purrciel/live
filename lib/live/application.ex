@@ -21,6 +21,13 @@ defmodule Live.Application do
     # See https://elixir.hexdocs.pm/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Live.Supervisor]
+    children =
+      children ++
+        if(Application.get_env(:live_vue, :ssr_module) == LiveVue.SSR.QuickBEAM,
+          do: [LiveVue.SSR.QuickBEAM],
+          else: []
+        )
+
     Supervisor.start_link(children, opts)
   end
 

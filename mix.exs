@@ -40,6 +40,8 @@ defmodule Live.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:quickbeam, "~> 0.8"},
+      {:live_vue, "~> 1.0"},
       {:phoenix, "~> 1.8.13"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.13"},
@@ -49,19 +51,10 @@ defmodule Live.MixProject do
       {:phoenix_live_view, "~> 1.2.0"},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
-      {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
-      {:tailwind, "~> 0.5", runtime: Mix.env() == :dev},
       {:heroicons,
        github: "tailwindlabs/heroicons",
        tag: "v2.2.0",
        sparse: "optimized",
-       app: false,
-       compile: false,
-       depth: 1},
-      {:daisyui,
-       github: "saadeghi/daisyui",
-       tag: "v5.5.20",
-       sparse: "packages/bundle",
        app: false,
        compile: false,
        depth: 1},
@@ -78,10 +71,12 @@ defmodule Live.MixProject do
       # {:membrane_vk_video_plugin, "~> 0.2.1"}, # GPU-транскодинг через Vulkan Video
       {:membrane_rtmp_plugin, "~> 0.29.3"},
       {:membrane_http_adaptive_stream_plugin, "~> 0.21.3"},
-      {:membrane_mp4_plugin, "~> 0.36.0"}, # CMAF / fMP4
+      # CMAF / fMP4
+      {:membrane_mp4_plugin, "~> 0.36.0"},
       {:membrane_h26x_plugin, "~> 0.10.5"},
       {:membrane_aac_plugin, "~> 0.19.0"},
-      {:ex_aws_s3, "~> 2.5"}, # Для продакшн-хранилища
+      # Для продакшн-хранилища
+      {:ex_aws_s3, "~> 2.5"},
       {:hackney, ">= 0.0.0"}
     ]
   end
@@ -98,12 +93,13 @@ defmodule Live.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["compile", "tailwind live", "esbuild live"],
+      "assets.setup": ["phoenix_vite.npm assets install"],
+      "assets.build": [
+        "phoenix_vite.npm vite build --manifest --ssrManifest --emptyOutDir true",
+        "phoenix_vite.npm vite build --emptyOutDir false --ssr js/server.js --outDir ../priv/static"
+      ],
       "assets.deploy": [
-        "tailwind live --minify",
-        "esbuild live --minify",
-        "phx.digest"
+        "assets.build"
       ],
       precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
     ]

@@ -34,39 +34,134 @@ defmodule LiveWeb.Layouts do
   slot :inner_block, required: true
 
   def app(assigns) do
-    ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://phoenix.hexdocs.pm/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </header>
+  ~H"""
+    <div class="drawer lg:drawer-open min-h-screen bg-base-100 text-base-content">
+      <input id="main-drawer" type="checkbox" class="drawer-toggle" />
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
-        {render_slot(@inner_block)}
+      <div class="drawer-content flex flex-col">
+        <!-- Top Navbar -->
+        <header class="navbar bg-base-200 border-b border-base-300 sticky top-0 z-30 px-4 gap-4">
+          <!-- Mobile Sidebar Toggle -->
+          <div class="flex-none lg:hidden">
+            <label for="main-drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
+              <.icon name="hero-bars-3" class="size-6" />
+            </label>
+          </div>
+
+          <!-- Brand Logo -->
+          <div class="flex-none">
+            <a href="/" class="flex items-center gap-2 font-bold text-xl tracking-wide text-primary">
+              <.icon name="hero-tv" class="size-7" />
+              <span>OxygenLive</span>
+            </a>
+          </div>
+
+          <!-- Navigation Links -->
+          <ul class="menu menu-horizontal px-1 hidden md:flex font-medium">
+            <li><a href="/" class="active">Browse</a></li>
+            <li><a href="/categories">Categories</a></li>
+          </ul>
+
+          <!-- Search Bar -->
+          <div class="flex-1 max-w-md mx-auto hidden sm:block">
+            <div class="form-control w-full">
+              <div class="input-group flex items-center bg-base-300 rounded-lg px-3">
+                <.icon name="hero-magnifying-glass" class="size-5 text-base-content/50 mr-2" />
+                <input
+                  type="text"
+                  placeholder="Search channels or games..."
+                  class="input input-sm border-none bg-transparent focus:outline-none w-full"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Action Items -->
+          <div class="flex-none flex items-center gap-3 ml-auto">
+            <a href="/dashboard" class="btn btn-primary btn-sm gap-2">
+              <.icon name="hero-video-camera" class="size-4" />
+              <span class="hidden sm:inline">Go Live</span>
+            </a>
+
+            <.theme_toggle />
+
+            <!-- User Menu Dropdown (Placeholder) -->
+            <div class="dropdown dropdown-end">
+              <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                <div class="w-9 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=streamer" alt="Avatar" />
+                </div>
+              </div>
+              <ul
+                tabindex="0"
+                class="mt-3 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-base-200 rounded-box w-52 space-y-1"
+              >
+                <li><a href="/channel/my-channel">My Channel</a></li>
+                <li><a href="/dashboard">Stream Dashboard</a></li>
+                <li><a href="/settings">Settings</a></li>
+                <div class="divider my-1"></div>
+                <li><a class="text-error">Logout</a></li>
+              </ul>
+            </div>
+          </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-4 lg:p-6 w-full max-w-[1920px] mx-auto">
+          {render_slot(@inner_block)}
+        </main>
       </div>
-    </main>
+
+      <!-- Left Sidebar (Recommended Channels) -->
+      <div class="drawer-side z-40">
+        <label for="main-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+        <aside class="bg-base-200 w-64 min-h-full border-r border-base-300 flex flex-col p-3">
+          <div class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-base-content/60 flex items-center justify-between">
+            <span>Recommended Channels</span>
+            <.icon name="hero-signal" class="size-4 text-error animate-pulse" />
+          </div>
+
+          <!-- Channel List -->
+          <ul class="menu menu-md w-full space-y-1 p-0 mt-2">
+            <li>
+              <a href="/channel/dev_stream" class="flex items-center gap-3 py-2">
+                <div class="avatar online">
+                  <div class="w-8 rounded-full">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=dev1" />
+                  </div>
+                </div>
+                <div class="flex-1 overflow-hidden">
+                  <p class="font-semibold text-sm truncate">Elixir_Coder</p>
+                  <p class="text-xs text-base-content/60 truncate">Phoenix & LiveVue</p>
+                </div>
+                <div class="text-xs font-mono text-base-content/70 flex items-center gap-1">
+                  <span class="size-2 rounded-full bg-error inline-block"></span>
+                  1.2k
+                </div>
+              </a>
+            </li>
+
+            <li>
+              <a href="/channel/game_zone" class="flex items-center gap-3 py-2">
+                <div class="avatar online">
+                  <div class="w-8 rounded-full">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=gamer" />
+                  </div>
+                </div>
+                <div class="flex-1 overflow-hidden">
+                  <p class="font-semibold text-sm truncate">GameZone</p>
+                  <p class="text-xs text-base-content/60 truncate">Godot 4.3 Indie Dev</p>
+                </div>
+                <div class="text-xs font-mono text-base-content/70 flex items-center gap-1">
+                  <span class="size-2 rounded-full bg-error inline-block"></span>
+                  450
+                </div>
+              </a>
+            </li>
+          </ul>
+        </aside>
+      </div>
+    </div>
 
     <.flash_group flash={@flash} />
     """
@@ -120,41 +215,55 @@ defmodule LiveWeb.Layouts do
     </div>
     """
   end
+@doc """
+Renders a theme selector dropdown with standard and custom DaisyUI themes.
+"""
+def theme_toggle(assigns) do
+  assigns = assign(assigns, :themes, [
+    %{id: "system", name: "System", icon: "hero-computer-desktop-micro"},
+    %{id: "dark", name: "Dark (Default)", icon: "hero-moon-micro"},
+    %{id: "night", name: "Night (Twitch)", icon: "hero-sparkles-micro"},
+    %{id: "sunset", name: "Sunset", icon: "hero-fire-micro"},
+    %{id: "dracula", name: "Dracula", icon: "hero-eye-micro"},
+    %{id: "light", name: "Light", icon: "hero-sun-micro"}
+  ])
 
-  @doc """
-  Provides dark vs light theme toggle based on themes defined in app.css.
-
-  See <head> in root.html.heex which applies the theme before page load.
-  """
-  def theme_toggle(assigns) do
-    ~H"""
-    <div class="card relative flex flex-row items-center border-2 border-base-300 bg-base-300 rounded-full">
-      <div class="absolute w-1/3 h-full rounded-full border-1 border-base-200 bg-base-100 brightness-200 left-0 [[data-theme=light]_&]:left-1/3 [[data-theme=dark]_&]:left-2/3 [[data-theme-source=system]_&]:!left-0 transition-[left]" />
-
-      <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="system"
-      >
-        <.icon name="hero-computer-desktop-micro" class="size-4 opacity-75 hover:opacity-100" />
-      </button>
-
-      <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="light"
-      >
-        <.icon name="hero-sun-micro" class="size-4 opacity-75 hover:opacity-100" />
-      </button>
-
-      <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="dark"
-      >
-        <.icon name="hero-moon-micro" class="size-4 opacity-75 hover:opacity-100" />
-      </button>
+  ~H"""
+  <div class="dropdown dropdown-end">
+    <div tabindex="0" role="button" class="btn btn-ghost btn-sm gap-2 border border-base-300">
+      <.icon name="hero-swatch-micro" class="size-4" />
+      <span class="hidden sm:inline text-xs font-medium">Theme</span>
+      <.icon name="hero-chevron-down-micro" class="size-3 opacity-60" />
     </div>
-    """
-  end
+
+    <ul
+      tabindex="0"
+      class="dropdown-content z-[50] menu p-2 shadow-2xl bg-base-200 rounded-box w-52 mt-2 border border-base-300 gap-1"
+    >
+      <li :for={theme <- @themes}>
+        <button
+          type="button"
+          class="flex items-center justify-between py-2 text-xs"
+          phx-click={JS.dispatch("phx:set-theme")}
+          data-phx-theme={theme.id}
+        >
+          <div class="flex items-center gap-2">
+            <.icon name={theme.icon} class="size-4 opacity-70" />
+            <span>{theme.name}</span>
+          </div>
+          <!-- Индикатор цвета темы из DaisyUI -->
+          <span
+            class="flex gap-0.5 p-1 bg-base-100 rounded border border-base-300"
+            data-theme={theme.id}
+          >
+            <span class="size-2 rounded-full bg-primary inline-block"></span>
+            <span class="size-2 rounded-full bg-secondary inline-block"></span>
+            <span class="size-2 rounded-full bg-accent inline-block"></span>
+          </span>
+        </button>
+      </li>
+    </ul>
+  </div>
+  """
+end
 end

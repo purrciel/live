@@ -18,6 +18,7 @@ defmodule LiveWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    live "/counter", Live.CounterLive
   end
 
   # Other scopes may use custom stacks.
@@ -38,6 +39,7 @@ defmodule LiveWeb.Router do
       pipe_through :browser
 
       live_dashboard "/dashboard", metrics: LiveWeb.Telemetry
+      live "/vue_demo", LiveWeb.VueDemoLive
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end

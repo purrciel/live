@@ -1,4 +1,5 @@
 import Config
+config :live_vue, vite_host: "http://localhost:5173", ssr_module: LiveVue.SSR.ViteJS
 
 # Configure your database
 config :live, Live.Repo,
@@ -24,10 +25,8 @@ config :live, LiveWeb.Endpoint,
   code_reloader: true,
   debug_errors: true,
   secret_key_base: "On794tiN7BaUJ/RFwatSi9KM4I3Vd36SEjBCFIxf71C2lv4Hb9nk2I8ITVrqlP0N",
-  watchers: [
-    esbuild: {Esbuild, :install_and_run, [:live, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:live, ~w(--watch)]}
-  ]
+  watchers: [vite: {PhoenixVite.Npm, :run, [:vite, ~w(dev)]}],
+  static_url: [host: "localhost", port: 5173]
 
 # ## SSL Support
 #
