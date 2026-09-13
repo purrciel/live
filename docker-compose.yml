@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    container_name: seaweedfs
+    ports:
+      - "9333:9333" # Master (управление)
+      - "8888:8888" # Filer (файловый API)
+      - "8333:8333" # S3 API
+    command: 'server -s3 -dir=/data'
+    volumes:
+      - ./seaweed_data:/data:Z
+    restart: unless-stopped
