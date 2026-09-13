@@ -34,7 +34,7 @@ defmodule LiveWeb.Layouts do
   slot :inner_block, required: true
 
   def app(assigns) do
-  ~H"""
+    ~H"""
     <div class="drawer lg:drawer-open min-h-screen bg-base-100 text-base-content">
       <input id="main-drawer" type="checkbox" class="drawer-toggle" />
 
@@ -51,8 +51,7 @@ defmodule LiveWeb.Layouts do
           <!-- Brand Logo -->
           <div class="flex-none">
             <a href="/" class="flex items-center gap-2 font-bold text-xl tracking-wide text-primary">
-              <.icon name="hero-tv" class="size-7" />
-              <span>OxygenLive</span>
+              <.logo />
             </a>
           </div>
 
@@ -85,24 +84,46 @@ defmodule LiveWeb.Layouts do
 
             <.theme_toggle />
 
-            <!-- User Menu Dropdown (Placeholder) -->
-            <div class="dropdown dropdown-end">
-              <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-                <div class="w-9 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=streamer" alt="Avatar" />
+            <!-- User Menu / Auth Links -->
+            <%= if @current_scope do %>
+              <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                  <div class="w-9 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                    <img
+                      src={"https://api.dicebear.com/7.x/bottts/svg?seed=#{@current_scope.user.email}"}
+                      alt="Avatar"
+                    />
+                  </div>
                 </div>
+                <ul
+                  tabindex="0"
+                  class="mt-3 z-[50] p-2 shadow-lg menu menu-sm dropdown-content bg-base-200 rounded-box w-56 space-y-1 border border-base-300"
+                >
+                  <li class="px-3 py-2 border-b border-base-300">
+                    <span class="text-xs text-base-content/60 font-mono truncate">
+                      {@current_scope.user.email}
+                    </span>
+                  </li>
+                  <li><.link href={~p"/users/settings"}>Settings</.link></li>
+                  <li><a href="/dashboard">Stream Dashboard</a></li>
+                  <div class="divider my-1"></div>
+                  <li>
+                    <.link href={~p"/users/log-out"} method="delete" class="text-error">
+                      Log out
+                    </.link>
+                  </li>
+                </ul>
               </div>
-              <ul
-                tabindex="0"
-                class="mt-3 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-base-200 rounded-box w-52 space-y-1"
-              >
-                <li><a href="/channel/my-channel">My Channel</a></li>
-                <li><a href="/dashboard">Stream Dashboard</a></li>
-                <li><a href="/settings">Settings</a></li>
-                <div class="divider my-1"></div>
-                <li><a class="text-error">Logout</a></li>
-              </ul>
-            </div>
+            <% else %>
+              <div class="flex items-center gap-2">
+                <.link href={~p"/users/log-in"} class="btn btn-ghost btn-sm">
+                  Log in
+                </.link>
+                <.link href={~p"/users/register"} class="btn btn-primary btn-sm">
+                  Register
+                </.link>
+              </div>
+            <% end %>
           </div>
         </header>
 
@@ -111,7 +132,6 @@ defmodule LiveWeb.Layouts do
           {render_slot(@inner_block)}
         </main>
       </div>
-
       <!-- Left Sidebar (Recommended Channels) -->
       <div class="drawer-side z-40">
         <label for="main-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
@@ -121,45 +141,73 @@ defmodule LiveWeb.Layouts do
             <.icon name="hero-signal" class="size-4 text-error animate-pulse" />
           </div>
 
-          <!-- Channel List -->
+          <!-- Dynamic Channel List -->
           <ul class="menu menu-md w-full space-y-1 p-0 mt-2">
-            <li>
-              <a href="/channel/dev_stream" class="flex items-center gap-3 py-2">
-                <div class="avatar online">
-                  <div class="w-8 rounded-full">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=dev1" />
+            <%= for user <- Live.Accounts.list_recommended_users() do %>
+              <li>
+                <.link navigate={~p"/c/#{user.username}"} class="flex items-center gap-3 py-2">
+                  <div class="avatar online">
+                    <div class="w-8 rounded-full">
+                      <img
+                        src={
+                          user.avatar_url ||
+                            "https://api.dicebear.com/7.x/bottts/svg?seed=#{user.username}"
+                        }
+                        alt={user.username}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div class="flex-1 overflow-hidden">
-                  <p class="font-semibold text-sm truncate">Elixir_Coder</p>
-                  <p class="text-xs text-base-content/60 truncate">Phoenix & LiveVue</p>
-                </div>
-                <div class="text-xs font-mono text-base-content/70 flex items-center gap-1">
-                  <span class="size-2 rounded-full bg-error inline-block"></span>
-                  1.2k
-                </div>
-              </a>
-            </li>
-
-            <li>
-              <a href="/channel/game_zone" class="flex items-center gap-3 py-2">
-                <div class="avatar online">
-                  <div class="w-8 rounded-full">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=gamer" />
+                  <div class="flex-1 overflow-hidden">
+                    <p class="font-semibold text-sm truncate">{user.username}</p>
+                    <p class="text-xs text-base-content/60 truncate">
+                      {user.category || "Just Chatting"}
+                    </p>
                   </div>
-                </div>
-                <div class="flex-1 overflow-hidden">
-                  <p class="font-semibold text-sm truncate">GameZone</p>
-                  <p class="text-xs text-base-content/60 truncate">Godot 4.3 Indie Dev</p>
-                </div>
-                <div class="text-xs font-mono text-base-content/70 flex items-center gap-1">
-                  <span class="size-2 rounded-full bg-error inline-block"></span>
-                  450
-                </div>
-              </a>
-            </li>
+                  <div class="text-xs font-mono text-base-content/70 flex items-center gap-1">
+                    <span class="size-2 rounded-full bg-error inline-block"></span> LIVE
+                  </div>
+                </.link>
+              </li>
+            <% end %>
           </ul>
         </aside>
+      </div>
+    </div>
+    <.flash_group flash={@flash} />
+    """
+  end
+
+  @doc """
+  Renders clean layout for authentication pages (Login, Register, Password Reset).
+  No sidebar, centered card container.
+  """
+  attr :flash, :map, required: true, doc: "the map of flash messages"
+  slot :inner_block, required: true
+
+  def auth(assigns) do
+    ~H"""
+    <div class="min-h-screen bg-base-100 flex flex-col justify-center items-center p-4 relative">
+      <!-- Theme Toggle in top-right corner -->
+      <div class="absolute top-4 right-4">
+        <.theme_toggle />
+      </div>
+
+      <!-- Main Auth Wrapper -->
+      <div class="w-full max-w-md space-y-6">
+        <!-- Logo Header -->
+        <div class="text-center space-y-2">
+          <a
+            href="/"
+            class="inline-flex items-center gap-2 font-bold text-3xl tracking-wide text-primary"
+          >
+            <.logo />
+          </a>
+        </div>
+
+        <!-- Auth Card Body -->
+        <div class="bg-base-200 p-8 rounded-3xl border border-base-300 shadow-xl">
+          {render_slot(@inner_block)}
+        </div>
       </div>
     </div>
 
@@ -215,55 +263,57 @@ defmodule LiveWeb.Layouts do
     </div>
     """
   end
-@doc """
-Renders a theme selector dropdown with standard and custom DaisyUI themes.
-"""
-def theme_toggle(assigns) do
-  assigns = assign(assigns, :themes, [
-    %{id: "system", name: "System", icon: "hero-computer-desktop-micro"},
-    %{id: "dark", name: "Dark (Default)", icon: "hero-moon-micro"},
-    %{id: "night", name: "Night (Twitch)", icon: "hero-sparkles-micro"},
-    %{id: "sunset", name: "Sunset", icon: "hero-fire-micro"},
-    %{id: "dracula", name: "Dracula", icon: "hero-eye-micro"},
-    %{id: "light", name: "Light", icon: "hero-sun-micro"}
-  ])
 
-  ~H"""
-  <div class="dropdown dropdown-end">
-    <div tabindex="0" role="button" class="btn btn-ghost btn-sm gap-2 border border-base-300">
-      <.icon name="hero-swatch-micro" class="size-4" />
-      <span class="hidden sm:inline text-xs font-medium">Theme</span>
-      <.icon name="hero-chevron-down-micro" class="size-3 opacity-60" />
-    </div>
-
-    <ul
-      tabindex="0"
-      class="dropdown-content z-[50] menu p-2 shadow-2xl bg-base-200 rounded-box w-52 mt-2 border border-base-300 gap-1"
-    >
-      <li :for={theme <- @themes}>
-        <button
-          type="button"
-          class="flex items-center justify-between py-2 text-xs"
-          phx-click={JS.dispatch("phx:set-theme")}
-          data-phx-theme={theme.id}
-        >
-          <div class="flex items-center gap-2">
-            <.icon name={theme.icon} class="size-4 opacity-70" />
-            <span>{theme.name}</span>
-          </div>
-          <!-- Индикатор цвета темы из DaisyUI -->
-          <span
-            class="flex gap-0.5 p-1 bg-base-100 rounded border border-base-300"
-            data-theme={theme.id}
-          >
-            <span class="size-2 rounded-full bg-primary inline-block"></span>
-            <span class="size-2 rounded-full bg-secondary inline-block"></span>
-            <span class="size-2 rounded-full bg-accent inline-block"></span>
-          </span>
-        </button>
-      </li>
-    </ul>
-  </div>
+  @doc """
+  Renders a theme selector dropdown with standard and custom DaisyUI themes.
   """
-end
+  def theme_toggle(assigns) do
+    assigns =
+      assign(assigns, :themes, [
+        %{id: "system", name: "System", icon: "hero-computer-desktop-micro"},
+        %{id: "sunset", name: "Sunset", icon: "hero-fire-micro"},
+        %{id: "dark", name: "Dark (Default)", icon: "hero-moon-micro"},
+        %{id: "night", name: "Night (Twitch)", icon: "hero-sparkles-micro"},
+        %{id: "dracula", name: "Dracula", icon: "hero-eye-micro"},
+        %{id: "light", name: "Light", icon: "hero-sun-micro"}
+      ])
+
+    ~H"""
+    <div class="dropdown dropdown-end">
+      <div tabindex="0" role="button" class="btn btn-ghost btn-sm gap-2 border border-base-300">
+        <.icon name="hero-swatch-micro" class="size-4" />
+        <span class="hidden sm:inline text-xs font-medium">Theme</span>
+        <.icon name="hero-chevron-down-micro" class="size-3 opacity-60" />
+      </div>
+
+      <ul
+        tabindex="0"
+        class="dropdown-content z-[50] menu p-2 shadow-2xl bg-base-200 rounded-box w-52 mt-2 border border-base-300 gap-1"
+      >
+        <li :for={theme <- @themes}>
+          <button
+            type="button"
+            class="flex items-center justify-between py-2 text-xs"
+            phx-click={JS.dispatch("phx:set-theme")}
+            data-phx-theme={theme.id}
+          >
+            <div class="flex items-center gap-2">
+              <.icon name={theme.icon} class="size-4 opacity-70" />
+              <span>{theme.name}</span>
+            </div>
+            <!-- Индикатор цвета темы из DaisyUI -->
+            <span
+              class="flex gap-0.5 p-1 bg-base-100 rounded border border-base-300"
+              data-theme={theme.id}
+            >
+              <span class="size-2 rounded-full bg-primary inline-block"></span>
+              <span class="size-2 rounded-full bg-secondary inline-block"></span>
+              <span class="size-2 rounded-full bg-accent inline-block"></span>
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
+    """
+  end
 end

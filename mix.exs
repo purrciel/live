@@ -40,6 +40,7 @@ defmodule Live.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:bcrypt_elixir, "~> 3.0"},
       {:quickbeam, "~> 0.8"},
       {:live_vue, "~> 1.0"},
       {:phoenix, "~> 1.8.13"},

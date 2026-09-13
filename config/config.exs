@@ -7,6 +7,19 @@
 # General application configuration
 import Config
 
+config :live, :scopes,
+  user: [
+    default: true,
+    module: Live.Accounts.Scope,
+    assign_key: :current_scope,
+    access_path: [:user, :id],
+    schema_key: :user_id,
+    schema_type: :id,
+    schema_table: :users,
+    test_data_fixture: Live.AccountsFixtures,
+    test_setup_helper: :register_and_log_in_user
+  ]
+
 config :live_vue, ssr: true, shared_props: []
 
 config :phoenix_vite, PhoenixVite.Npm,
@@ -53,6 +66,29 @@ config :logger, :default_formatter,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+config :bundlex, :compiler_flags, [
+  "-include",
+  "cstdint"
+]
+
+config :ex_aws,
+  json_codec: Jason,
+  http_client: ExAws.Request.Req
+
+config :ex_aws, :s3,
+  scheme: "http://",
+  host: "localhost",
+  port: 8333,
+  access_key_id: "any",
+  secret_access_key: "any"
+
+config :finch, :s3_finch, name: ExAws.Finch
+
+config :live,
+  storage: :s3,
+  s3_bucket: "live-hls",
+  s3_prefix: "hls"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

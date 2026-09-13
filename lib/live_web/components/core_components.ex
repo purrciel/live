@@ -31,6 +31,70 @@ defmodule LiveWeb.CoreComponents do
 
   alias Phoenix.LiveView.JS
 
+  def logo(assigns) do
+    ~H"""
+    <div class="flex items-center gap-3">
+      <!-- Иконка Марсианина OxygenLive -->
+      <svg class="h-10 w-auto" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Антенны / Наушники -->
+        <path d="M 22 25 L 12 15" stroke="#4A343D" stroke-width="5" stroke-linecap="round" />
+        <path d="M 12 12 A 4 4 0 1 0 12 20" stroke="#4A343D" stroke-width="4" fill="none" />
+        <path d="M 78 25 L 88 15" stroke="#4A343D" stroke-width="5" stroke-linecap="round" />
+        <path d="M 88 12 A 4 4 0 1 1 88 20" stroke="#4A343D" stroke-width="4" fill="none" />
+
+        <!-- Тело марсианина -->
+        <rect
+          x="20"
+          y="22"
+          width="60"
+          height="90"
+          rx="25"
+          fill="#88B04B"
+          stroke="#4A343D"
+          stroke-width="6"
+        />
+
+        <!-- Глаза -->
+        <circle cx="40" cy="48" r="9" fill="#FFFFFF" stroke="#4A343D" stroke-width="4" />
+        <circle cx="40" cy="48" r="3.5" fill="#C84B31" />
+        <circle cx="60" cy="48" r="9" fill="#FFFFFF" stroke="#4A343D" stroke-width="4" />
+        <circle cx="60" cy="48" r="3.5" fill="#C84B31" />
+
+        <!-- Зубастый рот -->
+        <path
+          d="M 32 68 H 78 V 82 H 32 Z"
+          fill="#FFFFFF"
+          stroke="#4A343D"
+          stroke-width="4"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M 32 68 L 38 75 L 44 68 L 50 75 L 56 68 L 62 75 L 68 68 L 74 75 L 78 68"
+          stroke="#4A343D"
+          stroke-width="3"
+          fill="none"
+        />
+        <path
+          d="M 32 82 L 38 75 L 44 82 L 50 75 L 56 82 L 62 75 L 68 82 L 74 75 L 78 82"
+          stroke="#4A343D"
+          stroke-width="3"
+          fill="none"
+        />
+
+        <!-- Точка индикатора LIVE -->
+        <circle cx="50" cy="98" r="4" fill="#FF2E93" />
+      </svg>
+
+      <!-- Текст -->
+      <div class="flex flex-col leading-none font-extrabold tracking-tight text-[#4A343D]">
+        <span class="text-xl tracking-wider uppercase font-mono">
+          OXYGEN<span class="text-[#88B04B]">LIVE</span>
+        </span>
+      </div>
+    </div>
+    """
+  end
+
   @doc """
   Renders flash notices.
 

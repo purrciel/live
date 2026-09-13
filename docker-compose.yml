@@ -1,9 +1,27 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DB: live_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data:Z
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   seaweedfs:
     image: chrislusf/seaweedfs:latest
-    container_name: seaweedfs
+    container_name: live_seaweedfs
     ports:
       - "9333:9333" # Master (управление)
       - "8888:8888" # Filer (файловый API)

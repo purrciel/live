@@ -9,13 +9,14 @@ defmodule Live.Application do
   def start(_type, _args) do
     children = [
       LiveWeb.Telemetry,
-      # Live.Repo,
+      Live.Repo,
       {DNSCluster, query: Application.get_env(:live, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Live.PubSub},
       # Start a worker by calling: Live.Worker.start_link(arg)
       # {Live.Worker, arg},
       # Start to serve requests, typically the last entry
-      LiveWeb.Endpoint
+      LiveWeb.Endpoint,
+      Live.RTMPServer
     ]
 
     # See https://elixir.hexdocs.pm/Supervisor.html

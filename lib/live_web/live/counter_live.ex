@@ -3,7 +3,7 @@ defmodule LiveWeb.Live.CounterLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_scope={@current_scope}>
       <.vue count={@count} v-component="Counter" />
     </Layouts.app>
     """
