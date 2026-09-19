@@ -5,206 +5,136 @@ defmodule LiveWeb.Layouts do
   """
   use LiveWeb, :html
 
-  # Embed all files in layouts/* within this module.
-  # The default root.html.heex file contains the HTML
-  # skeleton of your application, namely HTML headers
-  # and other static content.
   embed_templates "layouts/*"
 
-  @doc """
-  Renders your app layout.
-
-  This function is typically invoked from every template,
-  and it often contains your application menu, sidebar,
-  or similar.
-
-  ## Examples
-
-      <Layouts.app flash={@flash}>
-        <h1>Content</h1>
-      </Layouts.app>
-
-  """
   attr :flash, :map, required: true, doc: "the map of flash messages"
-
-  attr :current_scope, :map,
-    default: nil,
-    doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
+  attr :current_scope, :map, default: nil, doc: "the current scope"
 
   slot :inner_block, required: true
 
   def app(assigns) do
+    # Подготавливаем список пользователей для Vue
+    recommended_users =
+      Live.Accounts.list_recommended_users()
+      |> Enum.map(fn user ->
+        %{
+          id: user.id,
+          username: user.username,
+          avatar_url: user.avatar_url,
+          category: Map.get(user, :category, "Just Chatting"),
+          viewers_count: Map.get(user, :viewers_count, Enum.random(15..450)),
+          is_live: Map.get(user, :is_live, true)
+        }
+      end)
+
+    assigns = assign(assigns, :recommended_users, recommended_users)
+
     ~H"""
-    <div class="drawer lg:drawer-open min-h-screen bg-base-100 text-base-content">
-      <input id="main-drawer" type="checkbox" class="drawer-toggle" />
+    <div class="min-h-screen bg-base-100 text-base-content flex flex-col">
+      <!-- Top Navbar -->
+      <header class="navbar bg-base-200/80 backdrop-blur-md border-b border-base-300 sticky top-0 z-30 px-4 gap-4">
+        <!-- Brand Logo -->
+        <div class="flex-none">
+          <.link navigate={~p"/"} class="flex items-center gap-2 font-bold text-xl tracking-wide text-primary">
+            <.logo />
+          </.link>
+        </div>
 
-      <div class="drawer-content flex flex-col">
-        <!-- Top Navbar -->
-        <header class="navbar bg-base-200 border-b border-base-300 sticky top-0 z-30 px-4 gap-4">
-          <!-- Mobile Sidebar Toggle -->
-          <div class="flex-none lg:hidden">
-            <label for="main-drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
-              <.icon name="hero-bars-3" class="size-6" />
-            </label>
+        <!-- Navigation Links -->
+        <ul class="menu menu-horizontal px-1 hidden md:flex font-medium text-sm gap-1">
+          <li><.link navigate={~p"/"} class="rounded-xl">Browse</.link></li>
+          <li><.link navigate={~p"/categories"} class="rounded-xl">Categories</.link></li>
+        </ul>
+
+        <!-- Search Bar -->
+        <div class="flex-1 max-w-md mx-auto hidden sm:block">
+          <div class="relative w-full">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-base-content/40">
+              <.icon name="hero-magnifying-glass" class="size-4" />
+            </span>
+            <input
+              type="text"
+              placeholder="Search channels or games..."
+              class="input input-sm w-full pl-9 pr-4 bg-base-300/60 focus:bg-base-100 border-base-300 focus:border-primary transition-all rounded-xl text-sm"
+            />
           </div>
+        </div>
 
-          <!-- Brand Logo -->
-          <div class="flex-none">
-            <a href="/" class="flex items-center gap-2 font-bold text-xl tracking-wide text-primary">
-              <.logo />
-            </a>
-          </div>
+        <!-- Right Action Items -->
+        <div class="flex-none flex items-center gap-2 ml-auto">
+          <.link navigate={~p"/dashboard"} class="btn btn-primary btn-sm gap-2 rounded-xl">
+            <.icon name="hero-video-camera" class="size-4" />
+            <span class="hidden sm:inline">Go Live</span>
+          </.link>
 
-          <!-- Navigation Links -->
-          <ul class="menu menu-horizontal px-1 hidden md:flex font-medium">
-            <li><a href="/" class="active">Browse</a></li>
-            <li><a href="/categories">Categories</a></li>
-          </ul>
+          <.theme_toggle />
 
-          <!-- Search Bar -->
-          <div class="flex-1 max-w-md mx-auto hidden sm:block">
-            <div class="form-control w-full">
-              <div class="input-group flex items-center bg-base-300 rounded-lg px-3">
-                <.icon name="hero-magnifying-glass" class="size-5 text-base-content/50 mr-2" />
-                <input
-                  type="text"
-                  placeholder="Search channels or games..."
-                  class="input input-sm border-none bg-transparent focus:outline-none w-full"
-                />
-              </div>
-            </div>
-          </div>
-
-          <!-- Right Action Items -->
-          <div class="flex-none flex items-center gap-3 ml-auto">
-            <a href="/dashboard" class="btn btn-primary btn-sm gap-2">
-              <.icon name="hero-video-camera" class="size-4" />
-              <span class="hidden sm:inline">Go Live</span>
-            </a>
-
-            <.theme_toggle />
-
-            <!-- User Menu / Auth Links -->
-            <%= if @current_scope do %>
-              <div class="dropdown dropdown-end">
-                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-                  <div class="w-9 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                    <img
-                      src={"https://api.dicebear.com/7.x/bottts/svg?seed=#{@current_scope.user.email}"}
-                      alt="Avatar"
-                    />
-                  </div>
+          <!-- User Menu -->
+          <%= if @current_scope do %>
+            <div class="dropdown dropdown-end">
+              <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar border border-base-300">
+                <div class="w-8 rounded-full">
+                  <img src={"https://api.dicebear.com/7.x/bottts/svg?seed=#{@current_scope.user.email}"} alt="Avatar" />
                 </div>
-                <ul
-                  tabindex="0"
-                  class="mt-3 z-[50] p-2 shadow-lg menu menu-sm dropdown-content bg-base-200 rounded-box w-56 space-y-1 border border-base-300"
-                >
-                  <li class="px-3 py-2 border-b border-base-300">
-                    <span class="text-xs text-base-content/60 font-mono truncate">
-                      {@current_scope.user.email}
-                    </span>
-                  </li>
-                  <li><.link href={~p"/users/settings"}>Settings</.link></li>
-                  <li><a href="/dashboard">Stream Dashboard</a></li>
-                  <div class="divider my-1"></div>
-                  <li>
-                    <.link href={~p"/users/log-out"} method="delete" class="text-error">
-                      Log out
-                    </.link>
-                  </li>
-                </ul>
               </div>
-            <% else %>
-              <div class="flex items-center gap-2">
-                <.link href={~p"/users/log-in"} class="btn btn-ghost btn-sm">
-                  Log in
-                </.link>
-                <.link href={~p"/users/register"} class="btn btn-primary btn-sm">
-                  Register
-                </.link>
-              </div>
-            <% end %>
-          </div>
-        </header>
+              <ul tabindex="0" class="mt-3 z-[50] p-2 shadow-2xl menu menu-sm dropdown-content bg-base-200 rounded-2xl w-56 border border-base-300">
+                <li class="px-3 py-2 border-b border-base-300/60">
+                  <span class="text-xs text-base-content/60 font-mono truncate">
+                    {@current_scope.user.email}
+                  </span>
+                </li>
+                <li><.link href={~p"/users/settings"}>Settings</.link></li>
+                <li><.link navigate={~p"/dashboard"}>Stream Dashboard</.link></li>
+                <div class="divider my-1"></div>
+                <li>
+                  <.link href={~p"/users/log-out"} method="delete" class="text-error font-semibold">
+                    Log out
+                  </.link>
+                </li>
+              </ul>
+            </div>
+          <% else %>
+            <div class="flex items-center gap-1.5">
+              <.link href={~p"/users/log-in"} class="btn btn-ghost btn-sm rounded-xl">Log in</.link>
+              <.link href={~p"/users/register"} class="btn btn-primary btn-sm rounded-xl">Register</.link>
+            </div>
+          <% end %>
+        </div>
+      </header>
+
+      <!-- Main Layout Structure -->
+      <div class="flex flex-1 overflow-hidden">
+        <!-- LiveVue Interactive Sidebar -->
+        <.Sidebar channels={@recommended_users} />
 
         <!-- Main Content Area -->
-        <main class="flex-1 p-4 lg:p-6 w-full max-w-[1920px] mx-auto">
+        <main class="flex-1 overflow-y-auto p-4 lg:p-6 w-full max-w-[1920px] mx-auto">
           {render_slot(@inner_block)}
         </main>
       </div>
-      <!-- Left Sidebar (Recommended Channels) -->
-      <div class="drawer-side z-40">
-        <label for="main-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-        <aside class="bg-base-200 w-64 min-h-full border-r border-base-300 flex flex-col p-3">
-          <div class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-base-content/60 flex items-center justify-between">
-            <span>Recommended Channels</span>
-            <.icon name="hero-signal" class="size-4 text-error animate-pulse" />
-          </div>
-
-          <!-- Dynamic Channel List -->
-          <ul class="menu menu-md w-full space-y-1 p-0 mt-2">
-            <%= for user <- Live.Accounts.list_recommended_users() do %>
-              <li>
-                <.link navigate={~p"/c/#{user.username}"} class="flex items-center gap-3 py-2">
-                  <div class="avatar online">
-                    <div class="w-8 rounded-full">
-                      <img
-                        src={
-                          user.avatar_url ||
-                            "https://api.dicebear.com/7.x/bottts/svg?seed=#{user.username}"
-                        }
-                        alt={user.username}
-                      />
-                    </div>
-                  </div>
-                  <div class="flex-1 overflow-hidden">
-                    <p class="font-semibold text-sm truncate">{user.username}</p>
-                    <p class="text-xs text-base-content/60 truncate">
-                      {user.category || "Just Chatting"}
-                    </p>
-                  </div>
-                  <div class="text-xs font-mono text-base-content/70 flex items-center gap-1">
-                    <span class="size-2 rounded-full bg-error inline-block"></span> LIVE
-                  </div>
-                </.link>
-              </li>
-            <% end %>
-          </ul>
-        </aside>
-      </div>
     </div>
+
     <.flash_group flash={@flash} />
     """
   end
 
-  @doc """
-  Renders clean layout for authentication pages (Login, Register, Password Reset).
-  No sidebar, centered card container.
-  """
   attr :flash, :map, required: true, doc: "the map of flash messages"
   slot :inner_block, required: true
 
   def auth(assigns) do
     ~H"""
     <div class="min-h-screen bg-base-100 flex flex-col justify-center items-center p-4 relative">
-      <!-- Theme Toggle in top-right corner -->
       <div class="absolute top-4 right-4">
         <.theme_toggle />
       </div>
 
-      <!-- Main Auth Wrapper -->
       <div class="w-full max-w-md space-y-6">
-        <!-- Logo Header -->
         <div class="text-center space-y-2">
-          <a
-            href="/"
-            class="inline-flex items-center gap-2 font-bold text-3xl tracking-wide text-primary"
-          >
+          <.link navigate={~p"/"} class="inline-flex items-center gap-2">
             <.logo />
-          </a>
+          </.link>
         </div>
 
-        <!-- Auth Card Body -->
         <div class="bg-base-200 p-8 rounded-3xl border border-base-300 shadow-xl">
           {render_slot(@inner_block)}
         </div>
@@ -215,13 +145,6 @@ defmodule LiveWeb.Layouts do
     """
   end
 
-  @doc """
-  Shows the flash group with standard titles and content.
-
-  ## Examples
-
-      <.flash_group flash={@flash} />
-  """
   attr :flash, :map, required: true, doc: "the map of flash messages"
   attr :id, :string, default: "flash-group", doc: "the optional id of flash container"
 
@@ -264,23 +187,20 @@ defmodule LiveWeb.Layouts do
     """
   end
 
-  @doc """
-  Renders a theme selector dropdown with standard and custom DaisyUI themes.
-  """
   def theme_toggle(assigns) do
     assigns =
       assign(assigns, :themes, [
         %{id: "system", name: "System", icon: "hero-computer-desktop-micro"},
-        %{id: "sunset", name: "Sunset", icon: "hero-fire-micro"},
-        %{id: "dark", name: "Dark (Default)", icon: "hero-moon-micro"},
-        %{id: "night", name: "Night (Twitch)", icon: "hero-sparkles-micro"},
+        %{id: "dark", name: "Dark", icon: "hero-moon-micro"},
+        %{id: "night", name: "Night", icon: "hero-sparkles-micro"},
         %{id: "dracula", name: "Dracula", icon: "hero-eye-micro"},
+        %{id: "sunset", name: "Sunset", icon: "hero-fire-micro"},
         %{id: "light", name: "Light", icon: "hero-sun-micro"}
       ])
 
     ~H"""
     <div class="dropdown dropdown-end">
-      <div tabindex="0" role="button" class="btn btn-ghost btn-sm gap-2 border border-base-300">
+      <div tabindex="0" role="button" class="btn btn-ghost btn-sm gap-2 border border-base-300 rounded-xl">
         <.icon name="hero-swatch-micro" class="size-4" />
         <span class="hidden sm:inline text-xs font-medium">Theme</span>
         <.icon name="hero-chevron-down-micro" class="size-3 opacity-60" />
@@ -288,12 +208,12 @@ defmodule LiveWeb.Layouts do
 
       <ul
         tabindex="0"
-        class="dropdown-content z-[50] menu p-2 shadow-2xl bg-base-200 rounded-box w-52 mt-2 border border-base-300 gap-1"
+        class="dropdown-content z-[50] menu p-2 shadow-2xl bg-base-200 rounded-2xl w-52 mt-2 border border-base-300 gap-1"
       >
         <li :for={theme <- @themes}>
           <button
             type="button"
-            class="flex items-center justify-between py-2 text-xs"
+            class="flex items-center justify-between py-2 text-xs rounded-xl"
             phx-click={JS.dispatch("phx:set-theme")}
             data-phx-theme={theme.id}
           >
@@ -301,7 +221,6 @@ defmodule LiveWeb.Layouts do
               <.icon name={theme.icon} class="size-4 opacity-70" />
               <span>{theme.name}</span>
             </div>
-            <!-- Индикатор цвета темы из DaisyUI -->
             <span
               class="flex gap-0.5 p-1 bg-base-100 rounded border border-base-300"
               data-theme={theme.id}

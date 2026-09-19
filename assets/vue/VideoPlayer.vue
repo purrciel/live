@@ -10,6 +10,14 @@ const props = defineProps({
   autoplay: {
     type: Boolean,
     default: true
+  },
+  muted: {
+    type: Boolean,
+    default: true // По умолчанию выключаем звук для превью
+  },
+  controls: {
+    type: Boolean,
+    default: false // Для превью контролы не нужны
   }
 })
 
@@ -19,18 +27,16 @@ let hlsInstance = null
 const initPlayer = () => {
   if (!videoRef.value || !props.streamUrl) return
 
-  // Очищаем прошлый экземпляр Hls при смене streamUrl
   if (hlsInstance) {
     hlsInstance.destroy()
     hlsInstance = null
   }
 
-  // 1. Проверяем поддержку Hls.js
   if (Hls.isSupported()) {
     hlsInstance = new Hls({
       enableWorker: true,
       lowLatencyMode: true,
-      backBufferLength: 90
+      backBufferLength: 30
     })
 
     hlsInstance.loadSource(props.streamUrl)
@@ -39,62 +45,32 @@ const initPlayer = () => {
     hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
       if (props.autoplay) {
         videoRef.value.play().catch(() => {
-          // Если браузер заблокировал автовоспроизведение со звуком, включаем mute
           videoRef.value.muted = true
           videoRef.value.play()
         })
       }
     })
-
-    hlsInstance.on(Hls.Events.ERROR, (_event, data) => {
-      if (data.fatal) {
-        switch (data.type) {
-          case Hls.ErrorTypes.NETWORK_ERROR:
-            hlsInstance.startLoad()
-            break
-          case Hls.ErrorTypes.MEDIA_ERROR:
-            hlsInstance.recoverMediaError()
-            break
-          default:
-            initPlayer()
-            break
-        }
-      }
-    })
-  }
-  // 2. Native HLS support (Safari / iOS)
-  else if (videoRef.value.canPlayType('application/vnd.apple.mpegurl')) {
+  } else if (videoRef.value.canPlayType('application/vnd.apple.mpegurl')) {
     videoRef.value.src = props.streamUrl
     videoRef.value.addEventListener('loadedmetadata', () => {
-      if (props.autoplay) {
-        videoRef.value.play()
-      }
+      if (props.autoplay) videoRef.value.play()
     })
   }
 }
 
-onMounted(() => {
-  initPlayer()
-})
-
-watch(() => props.streamUrl, () => {
-  initPlayer()
-})
-
-onUnmounted(() => {
-  if (hlsInstance) {
-    hlsInstance.destroy()
-  }
-})
+onMounted(() => initPlayer())
+watch(() => props.streamUrl, () => initPlayer())
+onUnmounted(() => { if (hlsInstance) hlsInstance.destroy() })
 </script>
 
 <template>
-  <div class="relative w-full h-full bg-black rounded-xl overflow-hidden flex items-center justify-center">
+  <div class="relative w-full h-full bg-black overflow-hidden flex items-center justify-center">
     <video
       ref="videoRef"
-      controls
+      :controls="controls"
+      :muted="muted"
       playsinline
-      class="w-full h-full object-contain"
+      class="w-full h-full object-cover"
     ></video>
   </div>
 </template>

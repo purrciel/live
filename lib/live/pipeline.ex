@@ -4,15 +4,14 @@ defmodule Live.Pipeline do
 
   alias Membrane.HTTPAdaptiveStream
 
-  # Пады hls_sink, EOS от которых мы должны получить перед завершением
   @expected_pads MapSet.new([
                    Pad.ref(:input, {:video, :source}),
                    Pad.ref(:input, {:audio, :source})
                  ])
 
   def start_link(opts) do
-      process_opts = Keyword.take(opts, [:name])
-      Membrane.Pipeline.start_link(__MODULE__, opts, process_opts)
+    process_opts = Keyword.take(opts, [:name])
+    Membrane.Pipeline.start_link(__MODULE__, opts, process_opts)
   end
 
   @impl true
@@ -34,8 +33,6 @@ defmodule Live.Pipeline do
         },
         storage: storage
       }),
-
-      # ВИДЕО ПОТОК: RTMP -> Parser -> CMAF Muxer -> HLS Sink
       get_child(:rtmp_source)
       |> via_out(:video)
       |> child(:h264_parser, %Membrane.H264.Parser{
@@ -47,8 +44,6 @@ defmodule Live.Pipeline do
       })
       |> via_in(Pad.ref(:input, {:video, :source}), options: [segment_duration: segment_duration])
       |> get_child(:hls_sink),
-
-      # АУДИО ПОТОК: RTMP -> Parser -> CMAF Muxer -> HLS Sink
       get_child(:rtmp_source)
       |> via_out(:audio)
       |> child(:aac_parser, %Membrane.AAC.Parser{

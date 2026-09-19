@@ -31,6 +31,7 @@ defmodule Live.RTMPServer do
       segment_duration_sec = Application.get_env(:ex_broadcaster, :segment_duration_sec, 1)
 
       name = {:via, Registry, {Live.StreamRegistry, safe_key}}
+
       pipeline_opts = [
         name: name,
         client_ref: client_ref,
@@ -54,10 +55,6 @@ defmodule Live.RTMPServer do
           "Rejecting RTMP client (stream_key=#{inspect(stream_key)}): #{inspect(reason)}"
         )
 
-        # ВАЖНО: уточните в документации/исходниках вашей версии Membrane.RTMPServer,
-        # как правильно отклонить клиента (может быть отдельный модуль-хендлер,
-        # который сразу закрывает соединение, либо иной возврат из этой функции).
-        # Ниже — по крайней мере предохранитель, чтобы НЕ стартовать pipeline вхолостую.
         Membrane.RTMP.Source.ClientHandlerImpl
     end
   end
@@ -79,8 +76,6 @@ defmodule Live.RTMPServer do
     end
   end
 
-  # Разрешаем только безопасные символы в stream_key, чтобы исключить
-  # path traversal (../../etc) и мусорные названия директорий/S3-префиксов.
   defp validate_stream_key(stream_key) when is_binary(stream_key) do
     safe_key =
       stream_key
