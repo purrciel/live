@@ -25,14 +25,18 @@ defmodule LiveWeb.HlsController do
     end
   end
 
-  # Корректные MIME-типы для HLS (.m3u8 и fMP4 .m4s / .mp4)
   defp get_content_type(path, headers) do
     cond do
-      String.ends_with?(path, ".m3u8") -> "application/vnd.apple.mpegurl"
-      String.ends_with?(path, ".m4s") -> "video/iso.segment"
-      String.ends_with?(path, ".mp4") -> "video/mp4"
+      String.ends_with?(path, ".m3u8") ->
+        "application/vnd.apple.mpegurl"
+
+      String.ends_with?(path, ".m4s") ->
+        "video/iso.segment"
+
+      String.ends_with?(path, ".mp4") ->
+        "video/mp4"
+
       true ->
-        # Фолбэк на оригинальный header из SeaweedFS
         case List.keyfind(headers, "content-type", 0) do
           {_, [val | _]} -> val
           {_, val} when is_binary(val) -> val

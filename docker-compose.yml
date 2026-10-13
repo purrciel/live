@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: postgres
+    container_name: postgres-live
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres_password
@@ -21,7 +21,7 @@ services:
 
   seaweedfs:
     image: chrislusf/seaweedfs:latest
-    container_name: live_seaweedfs
+    container_name: live_seaweedfs_live
     ports:
       - "9333:9333" # Master (управление)
       - "8888:8888" # Filer (файловый API)

@@ -61,15 +61,10 @@ defmodule LiveWeb.ChannelLive do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="max-w-7xl mx-auto space-y-6">
-        <!-- Main Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-12rem)]">
-
-          <!-- Video & Stream Info (Left 3 cols) -->
           <div class="lg:col-span-3 flex flex-col space-y-4 overflow-y-auto">
-            <!-- Player Container -->
             <div class="aspect-video bg-black rounded-2xl overflow-hidden border border-base-300 shadow-md">
               <%= if @is_live do %>
-                <!-- ИСПРАВЛЕНО: Рендерим ПЛЕЕР, а не чат! -->
                 <.vue
                   v-component="VideoPlayer"
                   v-socket={@socket}
@@ -86,7 +81,6 @@ defmodule LiveWeb.ChannelLive do
               <% end %>
             </div>
 
-            <!-- Stream Metadata Header -->
             <div class="bg-base-200 p-5 rounded-2xl border border-base-300 flex items-start justify-between gap-4">
               <div class="flex items-center gap-4">
                 <div class="avatar placeholder">
@@ -112,15 +106,12 @@ defmodule LiveWeb.ChannelLive do
               </div>
 
               <button class="btn btn-primary btn-sm gap-2">
-                <.icon name="hero-heart" class="size-4" />
-                Follow
+                <.icon name="hero-heart" class="size-4" /> Follow
               </button>
             </div>
           </div>
 
-          <!-- Chat Sidebar (Right 1 col) -->
           <div class="lg:col-span-1 h-full min-h-[400px]">
-            <!-- ИСПРАВЛЕНО: Передаем messages={@messages} -->
             <.vue
               v-component="StreamChat"
               v-socket={@socket}
@@ -133,7 +124,6 @@ defmodule LiveWeb.ChannelLive do
               class="h-full"
             />
           </div>
-
         </div>
       </div>
     </Layouts.app>

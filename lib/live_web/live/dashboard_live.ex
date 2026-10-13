@@ -28,39 +28,32 @@ defmodule LiveWeb.DashboardLive do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="space-y-6 max-w-7xl mx-auto">
-        <!-- Dashboard Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-base-200 p-6 rounded-2xl border border-base-300">
           <div>
             <h1 class="text-2xl font-bold flex items-center gap-3">
-              <.icon name="hero-video-camera" class="size-8 text-primary" />
-              Stream Dashboard
+              <.icon name="hero-video-camera" class="size-8 text-primary" /> Stream Dashboard
             </h1>
             <p class="text-sm text-base-content/60 mt-1">
               Manage your stream settings and broadcast configuration
             </p>
           </div>
 
-          <!-- Status Indicator -->
           <div class="flex items-center gap-3">
             <span class="text-sm font-medium">Status:</span>
             <%= if @is_live do %>
               <div class="badge badge-error gap-2 p-3 font-semibold text-white animate-pulse">
-                <span class="size-2 rounded-full bg-white inline-block"></span>
-                LIVE NOW
+                <span class="size-2 rounded-full bg-white inline-block"></span> LIVE NOW
               </div>
             <% else %>
               <div class="badge badge-ghost gap-2 p-3 text-base-content/60">
-                <span class="size-2 rounded-full bg-base-content/30 inline-block"></span>
-                OFFLINE
+                <span class="size-2 rounded-full bg-base-content/30 inline-block"></span> OFFLINE
               </div>
             <% end %>
           </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- Left Main Column: Stream Preview & Live Chat/Stats Placeholder -->
           <div class="lg:col-span-2 space-y-6">
-            <!-- Stream Preview Box -->
             <div class="card bg-base-200 border border-base-300 overflow-hidden shadow-sm">
               <div class="card-body p-4">
                 <h2 class="card-title text-base flex items-center justify-between">
@@ -90,7 +83,6 @@ defmodule LiveWeb.DashboardLive do
               </div>
             </div>
 
-            <!-- Quick Stats -->
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div class="stat bg-base-200 rounded-xl border border-base-300 p-4">
                 <div class="stat-title text-xs">Current Viewers</div>
@@ -109,19 +101,16 @@ defmodule LiveWeb.DashboardLive do
             </div>
           </div>
 
-          <!-- Right Column: OBS Settings / Keys -->
           <div class="space-y-6">
             <div class="card bg-base-200 border border-base-300 shadow-sm">
               <div class="card-body p-5 space-y-4">
                 <h2 class="card-title text-lg flex items-center gap-2">
-                  <.icon name="hero-key" class="size-5 text-primary" />
-                  Stream Credentials
+                  <.icon name="hero-key" class="size-5 text-primary" /> Stream Credentials
                 </h2>
                 <p class="text-xs text-base-content/70">
                   Copy these credentials into OBS Studio / Streamlabs under Settings -> Stream -> Custom...
                 </p>
 
-                <!-- RTMP URL -->
                 <div class="form-control w-full">
                   <label class="label py-1">
                     <span class="label-text text-xs font-semibold">Server URL</span>
@@ -145,7 +134,6 @@ defmodule LiveWeb.DashboardLive do
                   </div>
                 </div>
 
-                <!-- Stream Key -->
                 <div class="form-control w-full">
                   <label class="label py-1">
                     <span class="label-text text-xs font-semibold">Stream Key</span>
@@ -169,8 +157,6 @@ defmodule LiveWeb.DashboardLive do
                     </button>
                   </div>
                 </div>
-
-                <!-- Actions -->
                 <div class="pt-2 flex flex-col gap-2">
                   <button
                     type="button"
@@ -178,14 +164,11 @@ defmodule LiveWeb.DashboardLive do
                     phx-click="reset_stream_key"
                     data-confirm="Are you sure? Your current stream will fail if you are live!"
                   >
-                    <.icon name="hero-arrow-path" class="size-4" />
-                    Reset Stream Key
+                    <.icon name="hero-arrow-path" class="size-4" /> Reset Stream Key
                   </button>
                 </div>
               </div>
             </div>
-
-            <!-- OBS Instructions Box -->
             <div class="alert bg-base-200 border border-base-300 text-xs space-y-1 block">
               <p class="font-bold text-primary flex items-center gap-1">
                 <.icon name="hero-information-circle" class="size-4" /> OBS Setup Guide
@@ -226,7 +209,6 @@ defmodule LiveWeb.DashboardLive do
     end
   end
 
-
   @impl true
   def handle_info({:stream_status, status}, socket) do
     {:noreply, assign(socket, :is_live, status == :online)}
@@ -247,7 +229,6 @@ defmodule LiveWeb.DashboardLive do
   end
 
   defp get_hls_stream_url(stream_key) do
-    # Формируем путь с текущей датой/часом в UTC (или берём активный из БД/Redis)
     now = DateTime.utc_now()
     year = String.pad_leading("#{now.year}", 4, "0")
     month = String.pad_leading("#{now.month}", 2, "0")

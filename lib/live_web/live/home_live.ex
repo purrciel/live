@@ -25,7 +25,6 @@ defmodule LiveWeb.HomeLive do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="space-y-8">
-        <!-- Hero Banner -->
         <div class="relative rounded-3xl bg-gradient-to-r from-primary/20 via-base-200 to-base-300 p-8 border border-base-300 overflow-hidden shadow-lg">
           <div class="max-w-2xl relative z-10 space-y-4">
             <span class="badge badge-primary font-semibold text-xs tracking-wider uppercase">
@@ -48,7 +47,6 @@ defmodule LiveWeb.HomeLive do
           </div>
         </div>
 
-        <!-- Live Channels Section -->
         <div class="space-y-4">
           <div class="flex items-center justify-between">
             <h2 class="text-2xl font-bold tracking-tight flex items-center gap-2">

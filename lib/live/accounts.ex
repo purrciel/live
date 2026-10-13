@@ -1,6 +1,7 @@
 defmodule Live.Accounts do
   @moduledoc """
   The Accounts context.
+  Это mix phx.gen.auth - встроенный auth.
   """
 
   import Ecto.Query, warn: false
@@ -109,6 +110,7 @@ defmodule Live.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
+
   # def register_user(attrs) do
   #   %User{}
   #   |> User.email_changeset(attrs)
